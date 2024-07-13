@@ -13,8 +13,8 @@
 
   exports.fetchAllProducts = async (req, res) => {
     // here we need all query string
-    let query = Product.find({});
-    let totalProductsQuery=Product.find({})
+    let query = Product.find({deleted:{$ne:true}});
+    let totalProductsQuery=Product.find({deleted:{$ne:true}})
 
     // For Category Filter
     if(req.query.category){
