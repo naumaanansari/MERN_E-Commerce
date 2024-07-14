@@ -12,9 +12,13 @@
   };
 
   exports.fetchAllProducts = async (req, res) => {
+    let condition ={}
+    if(!req.query.admin){
+      condition.deleted = {$ne: true}
+    }
     // here we need all query string
-    let query = Product.find({deleted:{$ne:true}});
-    let totalProductsQuery=Product.find({deleted:{$ne:true}})
+    let query = Product.find(condition);
+    let totalProductsQuery=Product.find(condition)
 
     // For Category Filter
     if(req.query.category){
