@@ -1,12 +1,14 @@
 const express = require('express');
-const { createUser } = require('../controller/User');
-const { loginUser } = require('../controller/Auth');
+const { loginUser, checkUser, createUser } = require('../controller/Auth');
+const passport = require('passport');
 
 const router = express.Router();
 
 // /auth is already added in base path
 router.post('/signup', createUser)
-      .post('/login', loginUser)
+      .post('/login',passport.authenticate('local'), loginUser )
+      .get('/check', checkUser)
 
 
-exports.router = router;
+
+exports.router = router; 
