@@ -1,5 +1,7 @@
 const express = require("express");
+const server = express();
 const mongoose = require("mongoose");
+const cors = require("cors");
 const session = require("express-session");
 
 //Passport Js Variables
@@ -9,20 +11,32 @@ const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
-//Cors Variables
-const cors = require("cors");
+const cookieParser =  require('cookie-parser')
+//Importing Routers
+const productsRouter = require("./routes/Products");
+const categoriesRouter = require("./routes/Category");
+const brandsRouter = require("./routes/Brands");
+const usersRouter = require("./routes/Users");
+const authRouter = require("./routes/Auth");
+const cartRouter = require("./routes/Cart");
+const orderRouter = require("./routes/Order");
 const { User } = require("./model/User");
-const server = express();
+const { isAuth, sanitizedUser, cookieExtractor } = require("./services/common");
+
 
 const SECRET_KEY = "SECRET_KEY";
 
+
+
+
 //Jwt Options
 const opts = {};
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = SECRET_KEY; // Should Be in code
 
 // Middlewares
-// This Should Be Used On the top of the All Middlewares
+server.use(express.static('build'))
+server.use(cookieParser())
 server.use(
   session({
     secret: "keyboard cat",
@@ -38,21 +52,12 @@ server.use(
   })
 );
 
-//Importing Routers
-const productsRouter = require("./routes/Products");
-const categoriesRouter = require("./routes/Category");
-const brandsRouter = require("./routes/Brands");
-const usersRouter = require("./routes/Users");
-const authRouter = require("./routes/Auth");
-const cartRouter = require("./routes/Cart");
-const orderRouter = require("./routes/Order");
-const { isAuth, sanitizedUser } = require("./services/common");
 
 server.use(express.json()); //to parse req.body
 server.use("/products", isAuth(), productsRouter.router); // we can also use jwt token
 server.use("/categories",isAuth(), categoriesRouter.router);
 server.use("/brands",isAuth(), brandsRouter.router);
-server.use("/users", usersRouter.router);
+server.use("/users",isAuth(), usersRouter.router); // check this in backend previous commit 
 server.use("/auth", authRouter.router);
 server.use("/cart",isAuth(), cartRouter.router);
 server.use("/orders",isAuth(), orderRouter.router);
@@ -80,7 +85,7 @@ passport.use(
           }
           const token = jwt.sign(sanitizedUser(user), SECRET_KEY);
 
-          done(null, token); //This lines sends to serialize
+          done(null, {token}); //This lines sends to serialize
         }
       );
     } catch (err) {
@@ -94,7 +99,7 @@ passport.use(
   new JwtStrategy(opts, async function (jwt_payload, done) {
 
     try {
-      const user = await User.findOne({ id: jwt_payload.sub });
+      const user = await User.findById( jwt_payload.id);
       if (user) {
         return done(null, sanitizedUser(user)); //this calls serializer
       } else {
