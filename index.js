@@ -23,7 +23,7 @@ const cartRouter = require("./routes/Cart");
 const orderRouter = require("./routes/Order");
 const { User } = require("./model/User");
 const { isAuth, sanitizedUser, cookieExtractor } = require("./services/common");
-
+const path = require('path')
 
 // Webhook
 
@@ -68,7 +68,7 @@ opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = process.env.JWT_SECRET_KEY; // Should Be in code
 
 // Middlewares
-server.use(express.static('build'))
+server.use(express.static(path.resolve(__dirname,'build')))
 server.use(cookieParser())
 server.use(
   session({
