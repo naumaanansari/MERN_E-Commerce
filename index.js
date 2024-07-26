@@ -26,6 +26,10 @@ const { isAuth, sanitizedUser, cookieExtractor } = require("./services/common");
 const path = require('path');
 const { Order } = require('./model/Order');
 
+
+
+
+
 // Webhook
 
 // TODO: we will capture actual order after deploying out server live on public URL
@@ -97,6 +101,10 @@ server.use("/users",isAuth(), usersRouter.router); // check this in backend prev
 server.use("/auth", authRouter.router);
 server.use("/cart",isAuth(), cartRouter.router);
 server.use("/orders",isAuth(), orderRouter.router);
+
+
+
+
 //Will redirect routing to our react routing
 server.get('*',(req,res)=> res.sendFile(path.resolve('build', 'index.html')))
 

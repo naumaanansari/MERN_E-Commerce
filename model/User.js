@@ -9,6 +9,7 @@ const userSchema = new Schema({
   // TODO: We Can Make Separate Schema For Addresses
   name: { type: String },
   salt: Buffer,
+  resetPasswordToken: { type: String, default: '' },
 });
 
 const virtual = userSchema.virtual("id");
