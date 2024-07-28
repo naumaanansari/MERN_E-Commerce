@@ -1,4 +1,6 @@
 const { Order } = require("../model/Order");
+const { sendMail, invoiceTemplate } = require("../services/common");
+const {User}= require("../model/User")
 
 exports.fetchOrdersByUser = async (req, res) => {
   const { id } = req.user;
@@ -14,11 +16,15 @@ exports.createOrder = async (req, res) => {
   const order = new Order(req.body);
   try {
     const doc = await order.save();
+    const user = await User.findById(order.user)
+    // we can use await for this also
+    sendMail({to:user.email,html:invoiceTemplate(order), subject:`Order Received For Order Id : ${order.id}`})
     res.status(201).json(doc);
   } catch (err) {
     res.status(400).json(err);
   }
 };
+// #${order.id}
 exports.deleteOrder = async (req, res) => {
     // We have to get this product from API
     const {id}= req.params;
