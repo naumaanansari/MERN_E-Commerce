@@ -25,7 +25,6 @@ exports.cookieExtractor = function (req) {
   if (req && req.cookies) {
     token = req.cookies["jwt"];
   }
-  //TODO: This is temporary token for testing without cookie
   return token;
 };
 

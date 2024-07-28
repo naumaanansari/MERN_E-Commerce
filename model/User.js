@@ -6,7 +6,6 @@ const userSchema = new Schema({
   password: { type: Buffer, required: true },
   role: { type: String, required: true, default: "user" },
   addresses: { type: [mongoose.Schema.Types.Mixed] },
-  // TODO: We Can Make Separate Schema For Addresses
   name: { type: String },
   salt: Buffer,
   resetPasswordToken: { type: String, default: '' },

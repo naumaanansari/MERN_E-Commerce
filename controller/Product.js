@@ -3,6 +3,7 @@
   exports.createProduct = async (req, res) => {
     // We have to get this product from API
     const product = new Product(req.body);
+    product.discountedPrice=Math.round(product.price*(1-product.discountPercentage/100));
     try {
       const doc = await product.save();
       res.status(201).json(doc);
@@ -19,19 +20,18 @@
     // here we need all query string
     let query = Product.find(condition);
     let totalProductsQuery=Product.find(condition)
-
+    console.log(req.query.category);
     // For Category Filter
     if(req.query.category){
-      query = query.find({category: req.query.category});
-      totalProductsQuery = totalProductsQuery.find({category: req.query.category});
+      query = query.find({category: {$in: req.query.category.split(',')}});
+      totalProductsQuery = totalProductsQuery.find({category: {$in: req.query.category.split(',')}});
     }
     //For Brand Filter
     if(req.query.brand){
-      query = query.find({brand: req.query.brand});
-      totalProductsQuery = totalProductsQuery.find({brand: req.query.brand});
+      query = query.find({brand: {$in: req.query.brand.split(',')}});
+      totalProductsQuery = totalProductsQuery.find({brand: {$in: req.query.brand.split(',')}});
 
     }
-    //TODO: How To Sort From Discounted Price
     //For Sorting 
     if(req.query._sort && req.query._order){
       query = query.sort({[req.query._sort]: req.query._order});
@@ -57,7 +57,6 @@
   //filter = {"category": ["smartphones",laptops]}
     //sort = {_sort: "price", _order= "desc"}
     //pagination=  {_page: "1", _limit= 10}
-    // TODO: We Have to try with Multiple categories and brads after change in frontend
 
     exports.fetchProductById = async (req,res) => {
       const {id}= req.params;
@@ -76,7 +75,9 @@
 
       try {
         const product= await Product.findByIdAndUpdate(id,req.body, {new: true});
-        res.status(200).json(product);
+        product.discountedPrice=Math.round(product.price*(1-product.discountPercentage/100));
+        const updatedProduct= await product.save()
+        res.status(200).json(updatedProduct);
       } catch (err) {
         res.status(400).json(err);
       }

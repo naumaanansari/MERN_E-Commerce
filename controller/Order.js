@@ -1,6 +1,7 @@
 const { Order } = require("../model/Order");
 const { sendMail, invoiceTemplate } = require("../services/common");
-const {User}= require("../model/User")
+const {User}= require("../model/User");
+const { Product } = require("../model/Products");
 
 exports.fetchOrdersByUser = async (req, res) => {
   const { id } = req.user;
@@ -14,6 +15,11 @@ exports.fetchOrdersByUser = async (req, res) => {
 exports.createOrder = async (req, res) => {
   // We have to get this product from API
   const order = new Order(req.body);
+  for (let item of  order.items) {
+    let product = await Product.findOne({_id: item.product.id})
+    product.$inc('stock', -1*item.quantity);
+    await product.save()
+  }
   try {
     const doc = await order.save();
     const user = await User.findById(order.user)
@@ -55,7 +61,6 @@ exports.deleteOrder = async (req, res) => {
     let totalOrdersQuery=Order.find({deleted:{$ne:true}})
 
     
-    //TODO: How To Sort From Discounted Price
     //For Sorting 
     if(req.query._sort && req.query._order){
       query = query.sort({[req.query._sort]: req.query._order});
